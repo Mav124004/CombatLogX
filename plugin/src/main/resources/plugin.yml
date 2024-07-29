@@ -13,10 +13,8 @@ folia-supported: true
 authors:
   - "SirBlobman"
 
-depend:
-  - "BlueSlimeCore"
-
 softdepend:
+  - "BlueSlimeCore"
   - "AngelChest"
   - "ASkyBlock"
   - "BentoBox" # BSkyBlock is an addon of BentoBox, not a plugin.

@@ -1,6 +1,7 @@
 package com.github.sirblobman.combatlogx.command.combatlogx;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +26,8 @@ public final class SubCommandUntag extends CombatLogCommand {
     @Override
     protected @NotNull List<String> onTabComplete(@NotNull CommandSender sender, String @NotNull [] args) {
         if (args.length == 1) {
-            Set<String> valueSet = getOnlinePlayerNames();
+            Set<String> valueSet = new HashSet<>(getOnlinePlayerNames());
+            valueSet.add("*");
             return getMatching(args[0], valueSet);
         }
 
@@ -38,6 +40,18 @@ public final class SubCommandUntag extends CombatLogCommand {
             return false;
         }
 
+        ICombatLogX plugin = getCombatLogX();
+        ICombatManager combatManager = plugin.getCombatManager();
+
+        if (args[0].equals("*")) {
+            List<Player> playersInCombat = combatManager.getPlayersInCombat();
+            for (Player player : playersInCombat) {
+                combatManager.untag(player, UntagReason.EXPIRE);
+            }
+            sendMessageWithPrefix(sender, "command.combatlogx.untag-all");
+            return true;
+        }
+
         Player target = findTarget(sender, args[0]);
         if (target == null) {
             return true;
@@ -46,8 +60,6 @@ public final class SubCommandUntag extends CombatLogCommand {
         String targetName = target.getName();
         Replacer replacer = new StringReplacer("{target}", targetName);
 
-        ICombatLogX plugin = getCombatLogX();
-        ICombatManager combatManager = plugin.getCombatManager();
         if (!combatManager.isInCombat(target)) {
             sendMessageWithPrefix(sender, "error.target-not-in-combat", replacer);
             return true;
